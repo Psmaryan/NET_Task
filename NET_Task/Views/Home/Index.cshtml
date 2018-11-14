@@ -1,0 +1,360 @@
+﻿@model NET_Task.Models.Book
+
+@{
+    ViewBag.Title = "Home Page";
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <div class="jumbotron">
+        <h1>BOOK CATALOG</h1>
+
+        <input type="hidden" id="timeminute" value="@ViewBag.Time">
+
+        <div class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" id="createbutton">Add a new book</div>
+
+        <div id="myModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" type="button" data-dismiss="modal">×</button>
+                        <h4 class="modal-title">Creating a new book</h4>
+                    </div>
+
+                    <div class="modal-body" id="createbook">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="row">
+            <h2>Fiction</h2>
+
+            
+            <div id="fiction" style="display:none">
+                @using GridMvc.Html
+
+                @{
+                    var grid = new WebGrid(ViewBag.Books[0], defaultSort: "Name");
+                }
+
+
+                @grid.GetHtml(
+                                 htmlAttributes: new { id = "gridFiction" },
+                                 tableStyle: "table table-bordered",
+                                 headerStyle: "head",
+                                 alternatingRowStyle: "active",
+                                 columns: grid.Columns(
+                                     grid.Column("Name"),
+                                     grid.Column("YearOfPublication"),
+                                     grid.Column("Description"),
+                                     grid.Column("Sages"),
+
+                      grid.Column("", format: @<button id="@item.Id" class="btn btn-danger center-block" onclick="DeleteButtonClicked(this)" data-is-deleted="false" data-delete-id="@item.Id"> Delete </button>)
+
+
+                                             )
+                         )
+            </div>
+            <FONT style="display: none" id="fictionEmpty" color="red" size="5">No books</FONT> 
+                 
+               
+        </div>
+
+            <h2>Nonfiction</h2>
+            <div id="nonfiction" style="display: none">
+                
+                    @using GridMvc.Html
+ 
+                    @{
+                        var grid2 = new WebGrid(ViewBag.Books[1], defaultSort: "Name");
+                    }
+
+                    @grid2.GetHtml(
+                                     htmlAttributes: new { id = "gridNonfiction" },
+                                     tableStyle: "table table-bordered",
+                                     headerStyle: "head",
+                                     alternatingRowStyle: "active",
+                                     columns: grid2.Columns(
+                                         grid2.Column("Name"),
+                                         grid2.Column("YearOfPublication"),
+                                         grid2.Column("Description"),
+                                         grid2.Column("Sages"),
+ 
+                                 grid2.Column("", format: @<button id="@item.Id" class="btn btn-danger center-block" onclick="DeleteButtonClicked(this)" data-is-deleted="false" data-delete-id="@item.Id"> Delete </button>)
+
+
+                                          )                                
+                      )
+
+                      
+            </div>
+            <FONT style="display: none" id="nonfictionEmpty" color="red" size="5">No books</FONT>
+                 
+            
+        
+    </div>
+
+
+    @section Scripts {
+        
+        @Scripts.Render("~/Scripts/timer.callback.js");
+    }
+    <script type="text/javascript">
+        var deleteId = [];
+        var createElement = [];
+
+        function DeleteButtonClicked(obj) {
+
+            var id = $(obj).data('delete-id');
+
+            if ($(obj).data('is-deleted') == false) {
+                if (!deleteId.includes(id)) {
+                    deleteId.push(id);
+                }
+                $(obj).data('is-deleted', true);
+                $(obj).addClass("btn-warning");
+                $(obj).removeClass("btn-danger");
+                $(obj).text("Deleted");
+            }
+            else {
+                
+                deleteId.pop(id);
+                $(obj).data('is-deleted', false);
+                $(obj).addClass("btn-danger");
+                $(obj).removeClass("btn-warning");
+                $(obj).text("Delete");
+            }
+
+        }
+
+        $(function () {
+            Visibility();
+            CallBack($('#timeminute').val() * 60);
+            
+
+            $('body').on('click', '#submitCreate', function (e) {
+                e.preventDefault();
+                
+                if ($("#nameCreate").val() != "" && $("#yearOfPublicationCreate").val() != "") {
+                    var newBook = {
+                        Id: '_' + Math.random().toString(36).substr(2, 9),
+                        Name: $("#nameCreate").val(),
+                        YearOfPublication: $("#yearOfPublicationCreate").val(),
+                        Description: $("#descriptionCreate").val(),
+                        TypeOfBook: $('#typeOfBookCreate > select :selected').text(),
+                        Sages: $("#sagesCreate").val()
+                    }
+                    createElement.push(newBook);
+                    //alert(newBook.Id + "\n" + newBook.Name + newBook.YearOfPublication + "\n" + newBook.Description + "\n" + newBook.TypeOfBook + "\n" + newBook.Sages);
+
+                    $("#nameCreate").val("");
+                    $("#yearOfPublicationCreate").val("");
+                    $("#descriptionCreate").val("");
+                    $("#typeOfBookCreate").val("");
+                    $("#sagesCreate").val("");
+
+                    if (newBook.TypeOfBook == 'Fiction')
+                        AddNewBook('fiction', newBook);
+                    else
+                        AddNewBook('nonfiction', newBook);
+
+                    Visibility();
+                }
+                else {
+                    alert("The name or year of publication of the book is empty.");
+                }
+            });
+
+            $("#createbutton").click(function () {
+
+                $.get('@Url.Action("Create")',
+                    function (data) {
+                        $('#createbook').html(data);
+                    });
+            });
+
+
+            $("#addbook").click(function () {
+                alert("this: " + $("#name2").val());
+
+            });
+
+            function AddNewBook(idTable, nBook) {
+
+                $('#' + idTable + ' > table').append('<tr>' +
+                    '<td>' + nBook.Name +'</td>' +
+                    '<td>' + nBook.YearOfPublication + '</td>' +
+                    '<td>' + nBook.Description + '</td>' +
+                    '<td>' + nBook.Sages + '</td>' +
+                    '<td>' + '<button id ="' + nBook.Id + '" class="btn btn-danger center-block" onclick="DeleteButtonClicked(this)" data-is-deleted="false" data-delete-id=' + nBook.Id +
+                                  '> Delete </button>' + '</td></tr>');
+            }
+            
+            function Visibility() {
+                if ($("#gridNonfiction tr").length > 1) {
+                    $("#nonfiction").css("display", "block");
+                    $("#nonfictionEmpty").css("display", "none");
+                }
+                else {
+                    $("#nonfiction").css("display", "none");
+                    $("#nonfictionEmpty").css("display", "block");
+                }
+
+                if ($("#gridFiction tr").length > 1) {
+                    $("#fiction").css("display", "block");
+                    $("#fictionEmpty").css("display", "none");
+                }
+                else {
+                    $("#fictionEmpty").css("display", "block");
+                    $("#fiction").css("display", "none");
+                }
+   
+            }
+
+            function DeleteOnServer() {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Delete")',
+                    data: JSON.stringify(deleteId),
+                    success: function (data, textStatus, jqXHR) {  
+                        $('#result').append(data.Message);
+
+                        if (data.ListError == null || data.ListError.length ==0) {
+                            $.each(deleteId, function (index, value) {
+                                $("#" + value).parents("tr").eq(0).remove();
+                            });
+                            deleteId = [];
+                        }
+                        else {
+
+                            $.each(data.ListError, function (index, value) {
+                                deleteId.pop(value);
+                                $("#" + value).data('is-deleted', false);
+                                $("#" + value).addClass("btn-danger");
+                                $("#" + value).removeClass("btn-warning");
+                            });
+                            $.each(deleteId, function (index, value) {
+                                $("#" + value).parents("tr").eq(0).remove();
+                            });
+                            deleteId = [];
+                            
+                        }
+
+                        ShowMessage();
+                        Visibility();
+                    }, 
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8'
+                });
+            }
+
+            function CreateOnServer() {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Create")',
+                    data: JSON.stringify(createElement),
+                    success: function (data, textStatus, jqXHR) {  
+                        $('#result').append(data.Message);
+                        
+                        if (data.ListError == null || data.ListError.length == 0) {
+                            createElement = [];
+                        }
+                        else {
+                            var deleteIdError = []
+                            
+                            $.each(data.ListError, function (index, value) {
+                                deleteIdError.push(value);
+                            });
+                            $.each(deleteIdError, function (index, value) {
+                               
+                                $("#" + value).parents("tr").eq(0).remove();
+                            });
+                            deleteIdError = [];
+                        }
+                        Visibility();
+                    },
+                    complete: function (jqXHR, textStatus) {
+
+                        if (deleteId != null && deleteId.length != 0) {
+                            DeleteOnServer();
+                        }
+                        else {
+                            ShowMessage();
+                        }
+                    },
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8'
+                });
+            }
+
+            function ShowMessage() {
+                $("#result").fadeIn();
+                setTimeout(function () {
+                    $("#result").fadeOut();
+                }, 4000);
+            }
+
+            function CallBack(tt) { 
+                var timeMinutes = GetClock(tt);
+                $('#timer').html(timeMinutes);
+
+                if (tt - 1 != 0) {
+                    setTimeout(function () {
+                        CallBack(tt - 1);
+                    }, 1000);
+                }
+                else {
+                    SendDataServer();
+                }
+            }
+
+            function GetClock(t) {
+                let h = Math.trunc(t / 3600);
+                let m = Math.trunc((t - h  * 3600) / 60);
+                let s = t - h * 3600 - m * 60;
+                let str = "";
+                if (h < 10 && h >= 0)
+                    str += "0"
+                str += h + ":";
+
+                if (m < 10 && m >= 0)
+                    str += "0"
+                str += m + ":";
+
+                if (s < 10 && s >= 0)
+                    str += "0"
+                str += s;
+
+                return str;
+            }
+
+            function SendDataServer() {
+                $("#result").html("");
+
+                if (createElement != null && createElement.length != 0) {
+                    CreateOnServer();
+                }
+                else {
+                    if (deleteId != null && deleteId.length != 0) {
+                        DeleteOnServer();
+
+                    }
+                }
+
+                CallBack($('#timeminute').val() * 60);
+            };
+            
+        });
+    </script>
+
+</body>
+</html>

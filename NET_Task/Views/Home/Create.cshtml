@@ -1,0 +1,63 @@
+﻿@using NET_Task.Models
+@model NET_Task.Models.Book
+
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+
+
+<form>
+
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", id = "nameCreate" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.YearOfPublication, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.YearOfPublication, new { htmlAttributes = new { @class = "form-control", id = "yearOfPublicationCreate" } })
+                @Html.ValidationMessageFor(model => model.YearOfPublication, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control", id = "descriptionCreate" } })
+                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TypeOfBook, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10" id="typeOfBookCreate"><br/>
+                @Html.EnumDropDownListFor(model => model.TypeOfBook, new { htmlAttributes = new { @class = "form-control list-group",  id = "typeOfBookCreate2" } })
+                @Html.ValidationMessageFor(model => model.TypeOfBook, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Sages, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Sages, new { htmlAttributes = new { @class = "form-control", id = "sagesCreate" } })
+                @Html.ValidationMessageFor(model => model.Sages, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-success" id="submitCreate"/>
+            </div>
+        </div>
+    </div>
+</form>
+
